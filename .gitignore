@@ -22,3 +22,7 @@ chroma/
 # Development verification files (temporary)
 verify_milestone*.py
 MILESTONE*_COMPLIANCE_REPORT.md
+test_*.py
+MILESTONE_*_GUIDE.md
+README_COVERAGE_CHECKLIST.md
+evaluation_results.txt
