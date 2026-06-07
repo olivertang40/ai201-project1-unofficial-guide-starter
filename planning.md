@@ -9,7 +9,7 @@
 
 ## Domain
 
-<!-- What domain did you choose? Why is this knowledge valuable and hard to find through official channels? -->
+**International Student Survival Guide for Trine University** - This domain provides comprehensive guidance for international students navigating Trine University's complex processes including admissions, scholarships, credit transfers, CPT/OPT work authorization, immigration status maintenance, on-campus requirements, health insurance, and application procedures. This knowledge is exceptionally valuable because official university resources typically present information in fragmented, legalistic language without practical insights from actual student experiences. International students face unique challenges such as understanding visa regulations, managing F-1 status requirements, accessing scholarships specific to their status, and navigating cultural adjustments that aren't adequately addressed in formal documentation. The gap between official policy and real-world implementation creates confusion and anxiety, making peer-to-peer knowledge sharing essential for successful academic and professional outcomes.
 
 ---
 
@@ -20,16 +20,16 @@
 
 | # | Source | Description | URL or location |
 |---|--------|-------------|-----------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
-| 7 | | | |
-| 8 | | | |
-| 9 | | | |
-| 10 | | | |
+| 1 | CISI Trine University FAQ - School Accreditation | Official accreditation information including HLC, SEVP, and Chinese Ministry of Education recognition | https://www.cisi-edu.org/trine-university-application-popular-questions-authoritative-interpretation-of-the-university/ |
+| 2 | CISI Trine University FAQ - Application Related Questions | Comprehensive Q&A about offer acceptance, campus differences, transfer policies, timeline recommendations, and program structure | doxs/申请相关.txt |
+| 3 | CISI Trine University FAQ - Application Materials | Detailed requirements for transcripts, financial proof ($22,000 minimum), resume, personal statement (350 words), and document authentication | doxs/申请材料.txt |
+| 4 | CISI Trine University FAQ - Scholarship Information | Graduate scholarship policies and availability | doxs/奖学金问题.txt |
+| 5 | CISI Trine University FAQ - Transfer Credit Policy | Credit transfer limits (max 6 credits), GPA requirements (3.0+), timing, and course equivalency guidelines | doxs/转学分问题.txt |
+| 6 | CISI Trine University FAQ - CPT Questions | Complete CPT guidance including start dates, work authorization timing, full-time vs part-time rules, RFE handling, and job loss procedures | doxs/CPT问题.txt |
+| 7 | CISI Trine University FAQ - Immigration Status | I-20 validity periods, RFE support materials, approval rates (<10% RFE rate), and documentation requirements | doxs/身份问题.txt |
+| 8 | CISI Trine University FAQ - Onsite Course Requirements | Onsite schedule (Saturdays/Sundays 8am-5pm), attendance policies, course selection flexibility, and advisor communication | doxs/Onsite问题.txt |
+| 9 | CISI Trine University FAQ - Health Insurance | Mandatory insurance through United Health Care (~$1,300/year PPO), waiver restrictions, dental/vision add-ons | doxs/保险问题.txt |
+| 10 | CISI Trine University FAQ - Application Process | Step-by-step application workflow, CISI agent selection, email templates, admission timeline (as fast as 12 hours) | doxs/申请流程.txt |
 
 ---
 
@@ -40,11 +40,11 @@
      numbers fit the structure of your documents.
      A review-heavy corpus warrants different chunking than a long FAQ. -->
 
-**Chunk size:**
+**Chunk size:** 512 tokens
 
-**Overlap:**
+**Overlap:** 100 tokens
 
-**Reasoning:**
+**Reasoning:** The document corpus contains mixed formats: policy documents with structured procedural steps (ISSS guidelines, SEVP regulations), FAQ-style content (admissions requirements, scholarship criteria), and unstructured student testimonials (Reddit posts, Facebook discussions). A 512-token chunk size balances several needs: (1) it captures complete procedural steps in policy documents without splitting critical multi-sentence instructions across chunks, (2) it accommodates typical Reddit post lengths while preserving context around key advice, and (3) it keeps individual scholarship or requirement descriptions intact. The 100-token overlap ensures that when a procedure spans two paragraphs or when a student testimonial references a prior statement, the semantic connection is preserved for accurate retrieval. This configuration works well for sentence-transformers models which perform optimally with chunks under 512 tokens.
 
 ---
 
@@ -56,11 +56,11 @@
      would you weigh in choosing a different embedding model — context length, multilingual
      support, accuracy on domain-specific text, latency? -->
 
-**Embedding model:**
+**Embedding model:** all-MiniLM-L6-v2 via sentence-transformers library
 
-**Top-k:**
+**Top-k:** 5
 
-**Production tradeoff reflection:**
+**Production tradeoff reflection:** For a production system serving international students globally, I would evaluate several tradeoffs: (1) **Multilingual support**: Many international students may query in their native language before translating; models like multilingual-e5-large or OpenAI's text-embedding-3-large handle cross-lingual retrieval better but increase computational cost 3-5x. (2) **Domain specificity**: Legal/immigration terminology (CPT, OPT, SEVIS, I-20) benefits from domain-tuned embeddings like BGE-M3, though fine-tuning requires labeled data we don't have. (3) **Context length**: all-MiniLM-L6-v2 maxes at 256 tokens per input, requiring careful pre-chunking; newer models support 512-8192 tokens but sacrifice speed. (4) **Latency vs. accuracy**: For real-time chat interfaces, all-MiniLM-L6-v2 offers ~50ms embedding time on CPU versus 200-500ms for larger models. Given our constraints, all-MiniLM-L6-v2 provides the best balance of speed, acceptable accuracy for English queries, and zero API costs. The top-k of 5 retrieves sufficient diverse contexts without overwhelming the LLM's context window, though I'd increase to 8-10 if implementing re-ranking.
 
 ---
 
@@ -73,11 +73,11 @@
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 | What are the CPT eligibility requirements and earliest start date at Trine University? | Students must understand that Program Start Date (orientation date) differs from Class Start Date. For Fall 2022 example, Program Start Date was 8/8/2022 while Class Start Date was 8/22/2022, and CPT can begin on the Program Start Date. CPT can be applied for anytime during the semester except the last 30 days. Break periods do not affect CPT usage. Only Experiential track requires CPT work. |
+| 2 | What are the application materials required for Trine University and what is the minimum financial proof amount? | Required materials include: resume (no specific format, just list academic and work experience), transcripts (must be authenticated and translated if from China), diploma, personal statement (~350 words, explain why Trine and chosen major, don't mention H1B or Day 1 CPT), passport and visa copies (expired OK), and financial proof of at least $22,000 (if not in student's name, need additional support letter). |
+| 3 | What is the transfer credit policy at Trine University and when can students apply for it? | Maximum 6 credits (two courses) can be transferred. Transferred courses must be master's level and similar to Trine courses. Students must achieve 3.0+ GPA in their first semester at Trine before applying for transfer credits. Application happens after first semester ends by submitting original school transcripts and syllabus. Students should communicate with academic advisor during first semester course selection to avoid taking courses they hope to waive. |
+| 4 | What are the health insurance requirements for F-1 international students at Trine and can students use their own insurance? | All F-1 visa students must have health insurance through Trine University (~$1,300/year PPO plan with United Health Care). Waivers are ONLY provided for sponsored students (government sponsor or employer). Individual and private insurance plans purchased by students DO NOT qualify for waiver. The plan does not include dental and vision insurance, but these can be added for extra fee. |
+| 5 | What is the step-by-step application process for Trine University through CISI and how long does admission take? | Steps: (1) Register account on Trine website, (2) Fill personal information, (3) Select "apply through CISI" to waive application fee and choose International Agent "CISI & info@cisi-edu.org", (4) Upload application materials, (5) Email admission officer sharmasrijana@trine.edu copying trine@cisi-edu.org with template including reference number. CISI contacts admission every Tuesday and Friday. Fastest admission decision can be received in just 12 hours. |
 
 ---
 
@@ -87,9 +87,9 @@
      Consider: noisy or inconsistent documents, missing source attribution, off-topic
      retrieval, chunks that split key information across boundaries. -->
 
-1.
+1. **Conflicting or outdated information across sources**: Official university policies change frequently (especially immigration-related rules tied to federal regulations), while student forums contain anecdotal experiences that may reference outdated procedures. For example, CPT processing times mentioned in Reddit posts from 2022 may no longer be accurate if ISSS streamlined their workflow in 2024. The system might retrieve contradictory advice without clear temporal markers, leading to confusion. Mitigation: Prioritize official sources in retrieval ranking, include publication/update dates in metadata, and instruct the LLM to flag discrepancies and recommend verifying with ISSS directly.
 
-2.
+2. **Fragmented procedural knowledge across multiple chunks**: Critical multi-step processes like "applying for OPT" involve sequential actions spread across different documents (SEVP regulations, ISSS checklist, student testimonials about timeline). A single chunk may capture only one step (e.g., "submit I-765 form") without the prerequisite steps (obtain recommendation letter from advisor, verify eligibility, pay USCIS fee). If retrieval returns non-contiguous chunks, the generated response may present an incomplete or incorrectly ordered procedure. Mitigation: Use metadata tagging to link related procedural chunks, implement re-ranking to prioritize chunks from the same document when one procedural step is found, and design prompts to explicitly request step-by-step sequences with warnings about consulting official checklists.
 
 ---
 
@@ -100,6 +100,63 @@
      Label each stage with the tool or library you're using.
      You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
+
+```
+graph LR
+    A[Document Ingestion] --> B[Chunking]
+    B --> C[Embedding + Vector Store]
+    C --> D[Retrieval]
+    D --> E[Generation]
+    
+    subgraph Stage1[Stage 1: Ingestion]
+        A1[Web Scraping<br/>BeautifulSoup] 
+        A2[PDF Parsing<br/>pdfplumber]
+        A3[Text Files<br/>Direct Read]
+    end
+    
+    subgraph Stage2[Stage 2: Chunking]
+        B1[Recursive Character<br/>Text Splitter<br/>LangChain]
+        B2[Chunk Size: 512 tokens<br/>Overlap: 100 tokens]
+    end
+    
+    subgraph Stage3[Stage 3: Embedding & Storage]
+        C1[sentence-transformers<br/>all-MiniLM-L6-v2]
+        C2[ChromaDB<br/>Vector Database]
+    end
+    
+    subgraph Stage4[Stage 4: Retrieval]
+        D1[Query Embedding<br/>same model]
+        D2[Similarity Search<br/>Cosine Similarity]
+        D3[Top-k: 5 chunks]
+    end
+    
+    subgraph Stage5[Stage 5: Generation]
+        E1[Groq API<br/>Llama 3 / Mixtral]
+        E2[System Prompt<br/>with Retrieved Context]
+        E3[Grounded Response<br/>with Citations]
+    end
+    
+    A1 --> A
+    A2 --> A
+    A3 --> A
+    A --> B1
+    B1 --> B2
+    B2 --> C1
+    C1 --> C2
+    D1 --> D2
+    D2 --> D3
+    D3 --> E2
+    E2 --> E1
+    E1 --> E3
+```
+
+**Technology Stack by Stage:**
+- **Ingestion**: BeautifulSoup4 (web scraping), pdfplumber (PDF extraction), requests (HTTP downloads)
+- **Chunking**: LangChain's RecursiveCharacterTextSplitter with custom token counting
+- **Embedding**: sentence-transformers library with all-MiniLM-L6-v2 model
+- **Vector Store**: ChromaDB (local persistent storage with HNSW index)
+- **Retrieval**: ChromaDB's similarity_search with cosine distance metric
+- **Generation**: Groq API (Llama-3-70b or Mixtral-8x7b) with temperature=0.3 for factual consistency
 
 ---
 
@@ -117,6 +174,12 @@
 
 **Milestone 3 — Ingestion and chunking:**
 
+I will use **Claude 3.5 Sonnet** to implement the ingestion and chunking modules. I'll provide it with: (1) the "Documents" table listing all 12 sources with their formats (HTML, PDF, plain text), (2) the "Chunking Strategy" section specifying 512-token chunks with 100-token overlap, and (3) sample raw text from a Reddit post and a PDF policy document to demonstrate input formats. I expect Claude to produce: `ingestion.py` with functions `scrape_webpage(url)`, `extract_pdf(filepath)`, and `load_text_file(filepath)` that return cleaned text strings, plus `chunking.py` with `chunk_text(text, chunk_size=512, overlap=100)` using LangChain's RecursiveCharacterTextSplitter configured for token-based splitting. I'll verify the output by: running the chunking function on a 2000-token test document and confirming it produces 4-5 chunks with proper overlap (checking that the last 100 tokens of chunk N match the first 100 tokens of chunk N+1), and ensuring PDF extraction preserves bullet points and numbered lists from ISSS handbooks.
+
 **Milestone 4 — Embedding and retrieval:**
 
+I will use **GitHub Copilot** (with GPT-4 backend) paired with manual testing to build the embedding and vector store components. I'll provide Copilot with: (1) the "Retrieval Approach" section specifying all-MiniLM-L6-v2 and top-k=5, (2) the Architecture diagram showing ChromaDB integration, and (3) inline comments in the code specifying function signatures like `embed_texts(texts: List[str]) -> np.ndarray` and `store_embeddings(chunks: List[dict], embeddings: np.ndarray, collection_name: str)`. I expect Copilot to autocomplete: `embedding.py` with `get_embedding_model()` returning the sentence-transformers model and `embed_batch(texts)` producing normalized embeddings, plus `vector_store.py` with `create_collection(name)` initializing ChromaDB, `add_documents(collection, chunks, embeddings)` storing vectors with metadata, and `search_collection(collection, query_embedding, k=5)` retrieving relevant chunks. I'll verify correctness by: embedding 3 known-similar sentences (e.g., "CPT requires one year of study", "You must complete two semesters before CPT eligibility", "One academic year is prerequisite for CPT") and confirming they have cosine similarity >0.8, then inserting 50 test chunks and querying with "scholarship GPA requirements" to check that the top-5 results include the scholarship policy document.
+
 **Milestone 5 — Generation and interface:**
+
+I will use **ChatGPT-4o** to develop the generation pipeline and simple web interface. I'll provide it with: (1) the "Evaluation Plan" table with 5 test questions and expected answers, (2) the "Anticipated Challenges" section highlighting the need for source attribution and handling conflicting information, (3) the Architecture diagram showing Groq API integration, and (4) a sample retrieved context block with 5 chunks. I expect ChatGPT to produce: `generation.py` with `build_prompt(query, retrieved_chunks)` constructing a system prompt that includes retrieved context with source citations, `generate_answer(prompt, model="llama3-70b")` calling Groq API with temperature=0.3 and max_tokens=500, and `app.py` implementing a Streamlit interface with text input, submit button, and formatted response display showing answer plus cited sources. I'll verify quality by: running all 5 evaluation questions through the system and checking that responses match expected answers within 80% semantic similarity (using BLEU score or manual grading), confirming that each response cites at least 2 sources, and testing edge cases like "What is CPT?" (should return general definition) versus "How do I apply for CPT at Trine?" (should return specific procedural steps with ISSS contact info).
