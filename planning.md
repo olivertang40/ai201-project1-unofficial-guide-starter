@@ -102,61 +102,86 @@
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
 
 ```
-graph LR
-    A[Document Ingestion] --> B[Chunking]
-    B --> C[Embedding + Vector Store]
-    C --> D[Retrieval]
-    D --> E[Generation]
-    
-    subgraph Stage1[Stage 1: Ingestion]
-        A1[Web Scraping<br/>BeautifulSoup] 
-        A2[PDF Parsing<br/>pdfplumber]
-        A3[Text Files<br/>Direct Read]
+graph TD
+    subgraph S1["Stage 1: Document Ingestion"]
+        A1["CISI Website<br/>BeautifulSoup4"] 
+        A2["doxs/ Topic Files<br/>UTF-8 Text Reader"]
+        A3["Python requests<br/>HTTP Downloads"]
     end
     
-    subgraph Stage2[Stage 2: Chunking]
-        B1[Recursive Character<br/>Text Splitter<br/>LangChain]
-        B2[Chunk Size: 512 tokens<br/>Overlap: 100 tokens]
+    subgraph S2["Stage 2: Chunking"]
+        B1["LangChain<br/>RecursiveCharacterTextSplitter"]
+        B2["Configuration:<br/>chunk_size=512 tokens<br/>chunk_overlap=100 tokens"]
+        B3["Chinese Text<br/>Preservation Logic"]
     end
     
-    subgraph Stage3[Stage 3: Embedding & Storage]
-        C1[sentence-transformers<br/>all-MiniLM-L6-v2]
-        C2[ChromaDB<br/>Vector Database]
+    subgraph S3["Stage 3: Embedding + Vector Store"]
+        C1["sentence-transformers<br/>all-MiniLM-L6-v2"]
+        C2["Embedding Output:<br/>768-dim vectors"]
+        C3["ChromaDB<br/>Persistent Collection<br/>HNSW Index"]
     end
     
-    subgraph Stage4[Stage 4: Retrieval]
-        D1[Query Embedding<br/>same model]
-        D2[Similarity Search<br/>Cosine Similarity]
-        D3[Top-k: 5 chunks]
+    subgraph S4["Stage 4: Retrieval"]
+        D1["User Query<br/>Text Input"]
+        D2["Query Embedding<br/>same model"]
+        D3["ChromaDB<br/>similarity_search<br/>metric=cosine"]
+        D4["Top-k=5<br/>Relevant Chunks<br/>with Metadata"]
     end
     
-    subgraph Stage5[Stage 5: Generation]
-        E1[Groq API<br/>Llama 3 / Mixtral]
-        E2[System Prompt<br/>with Retrieved Context]
-        E3[Grounded Response<br/>with Citations]
+    subgraph S5["Stage 5: Generation"]
+        E1["Prompt Builder<br/>System Prompt + Context"]
+        E2["Groq API<br/>Llama-3-70b-8192<br/>temperature=0.3"]
+        E3["Grounded Response<br/>with Source Citations"]
     end
     
-    A1 --> A
-    A2 --> A
-    A3 --> A
-    A --> B1
+    A1 --> INGEST["Ingest & Clean<br/>Text Strings"]
+    A2 --> INGEST
+    A3 --> INGEST
+    
+    INGEST --> B1
     B1 --> B2
-    B2 --> C1
+    B2 --> B3
+    B3 --> CHUNKS["Chunked Documents<br/>List[dict]"]
+    
+    CHUNKS --> C1
     C1 --> C2
+    C2 --> C3
+    
     D1 --> D2
     D2 --> D3
-    D3 --> E2
-    E2 --> E1
-    E1 --> E3
+    C3 --> D3
+    D3 --> D4
+    
+    D4 --> E1
+    E1 --> E2
+    E2 --> E3
+    
+    style S1 fill:#e1f5ff
+    style S2 fill:#fff4e1
+    style S3 fill:#e8f5e9
+    style S4 fill:#fce4ec
+    style S5 fill:#f3e5f5
 ```
 
-**Technology Stack by Stage:**
-- **Ingestion**: BeautifulSoup4 (web scraping), pdfplumber (PDF extraction), requests (HTTP downloads)
-- **Chunking**: LangChain's RecursiveCharacterTextSplitter with custom token counting
-- **Embedding**: sentence-transformers library with all-MiniLM-L6-v2 model
-- **Vector Store**: ChromaDB (local persistent storage with HNSW index)
-- **Retrieval**: ChromaDB's similarity_search with cosine distance metric
-- **Generation**: Groq API (Llama-3-70b or Mixtral-8x7b) with temperature=0.3 for factual consistency
+**Pipeline Flow Explanation:**
+
+1. **Document Ingestion**: Reads 10 sources (1 CISI webpage via BeautifulSoup4, 9 Chinese text files from `doxs/` directory using UTF-8 encoding) and outputs cleaned text strings with metadata (source name, topic category).
+
+2. **Chunking**: Uses LangChain's RecursiveCharacterTextSplitter configured for 512-token chunks with 100-token overlap. Special handling ensures Chinese characters aren't split mid-word and Q&A pairs stay together when possible.
+
+3. **Embedding + Vector Store**: Each chunk is embedded using sentence-transformers' all-MiniLM-L6-v2 model (producing 768-dimensional vectors). Vectors are stored in ChromaDB persistent collection with HNSW index for fast similarity search, along with metadata (source file, topic, chunk index).
+
+4. **Retrieval**: User query is embedded using the same model, then ChromaDB performs cosine similarity search to retrieve top-5 most relevant chunks with their source metadata.
+
+5. **Generation**: Retrieved chunks are formatted into a system prompt with source citations. Groq API (Llama-3-70b-8192) generates a grounded response at temperature=0.3 for factual consistency, citing which FAQ topics provided the information.
+
+**Technology Stack Summary:**
+- **Ingestion**: `beautifulsoup4`, `requests`, Python built-in `open()` with `encoding='utf-8'`
+- **Chunking**: `langchain-text-splitters` (RecursiveCharacterTextSplitter), `tiktoken` for token counting
+- **Embedding**: `sentence-transformers==3.4.1` (all-MiniLM-L6-v2)
+- **Vector Store**: `chromadb>=0.6.0` (persistent client with HNSW index)
+- **Retrieval**: ChromaDB `collection.similarity_search(query_embedding, k=5)`
+- **Generation**: `groq==0.15.0` SDK (Llama-3-70b-8192 model, temperature=0.3, max_tokens=500)
 
 ---
 
