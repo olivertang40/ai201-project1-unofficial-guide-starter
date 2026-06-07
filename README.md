@@ -1,7 +1,7 @@
 # The Unofficial Guide — Project 1
 
 > **Project:** Trine CISI FAQ Assistant  
-> **Author:** [Your Name]  
+> **Author:** Oliver Tang
 > **Date:** June 2026  
 > **Milestone:** Complete (Milestones 1-6)
 
@@ -9,7 +9,7 @@
 
 ## Domain
 
-**International Student Survival Guide for Trine University** - This domain provides comprehensive guidance for international students navigating Trine University's complex processes including admissions, scholarships, credit transfers, CPT/OPT work authorization, immigration status maintenance, on-campus requirements, health insurance, and application procedures. 
+**International Student Survival Guide for Trine University** - This domain provides comprehensive guidance for international students navigating Trine University's complex processes including admissions, scholarships, credit transfers, CPT/OPT work authorization, immigration status maintenance, on-campus requirements, health insurance, and application procedures.
 
 This knowledge is exceptionally valuable because official university resources typically present information in fragmented, legalistic language without practical insights from actual student experiences. International students face unique challenges such as understanding visa regulations, managing F-1 status requirements, accessing scholarships specific to their status, and navigating cultural adjustments that aren't adequately addressed in formal documentation. The gap between official policy and real-world implementation creates confusion and anxiety, making peer-to-peer knowledge sharing essential for successful academic and professional outcomes.
 
@@ -17,18 +17,18 @@ This knowledge is exceptionally valuable because official university resources t
 
 ## Document Sources
 
-| # | Source | Type | URL or file path |
-|---|--------|------|-----------------|
-| 1 | CISI Trine University FAQ - School Accreditation | Local text file | doxs/学校资质.txt |
-| 2 | CISI Trine University FAQ - Application Related Questions | Local text file | doxs/申请相关.txt |
-| 3 | CISI Trine University FAQ - Application Materials | Local text file | doxs/申请材料.txt |
-| 4 | CISI Trine University FAQ - Scholarship Information | Local text file | doxs/奖学金问题.txt |
-| 5 | CISI Trine University FAQ - Transfer Credit Policy | Local text file | doxs/转学分问题.txt |
-| 6 | CISI Trine University FAQ - CPT Questions | Local text file | doxs/CPT问题.txt |
-| 7 | CISI Trine University FAQ - Immigration Status | Local text file | doxs/身份问题.txt |
-| 8 | CISI Trine University FAQ - Onsite Course Requirements | Local text file | doxs/Onsite问题.txt |
-| 9 | CISI Trine University FAQ - Health Insurance | Local text file | doxs/保险问题.txt |
-| 10 | CISI Trine University FAQ - Application Process | Local text file | doxs/申请流程.txt |
+| #   | Source                                                    | Type            | URL or file path    |
+| --- | --------------------------------------------------------- | --------------- | ------------------- |
+| 1   | CISI Trine University FAQ - School Accreditation          | Local text file | doxs/学校资质.txt   |
+| 2   | CISI Trine University FAQ - Application Related Questions | Local text file | doxs/申请相关.txt   |
+| 3   | CISI Trine University FAQ - Application Materials         | Local text file | doxs/申请材料.txt   |
+| 4   | CISI Trine University FAQ - Scholarship Information       | Local text file | doxs/奖学金问题.txt |
+| 5   | CISI Trine University FAQ - Transfer Credit Policy        | Local text file | doxs/转学分问题.txt |
+| 6   | CISI Trine University FAQ - CPT Questions                 | Local text file | doxs/CPT问题.txt    |
+| 7   | CISI Trine University FAQ - Immigration Status            | Local text file | doxs/身份问题.txt   |
+| 8   | CISI Trine University FAQ - Onsite Course Requirements    | Local text file | doxs/Onsite问题.txt |
+| 9   | CISI Trine University FAQ - Health Insurance              | Local text file | doxs/保险问题.txt   |
+| 10  | CISI Trine University FAQ - Application Process           | Local text file | doxs/申请流程.txt   |
 
 ---
 
@@ -57,6 +57,7 @@ This knowledge is exceptionally valuable because official university resources t
 ## Grounded Generation
 
 **System prompt grounding instruction:**
+
 ```
 You are a helpful assistant answering questions about Trine University using ONLY the provided context from CISI FAQ documents.
 
@@ -80,13 +81,13 @@ ANSWER:
 
 ## Evaluation Report
 
-| # | Question | Expected answer | System response (summarized) | Retrieval quality | Response accuracy |
-|---|----------|-----------------|------------------------------|-------------------|-------------------|
-| 1 | What are the CPT eligibility requirements and earliest start date at Trine University? | Must include: Program Start Date vs Class Start Date distinction, can apply anytime except last 30 days, breaks don't affect CPT, only Experiential track requires CPT, contact DSO if job lost | System correctly identified Program Start Date concept and break policy. Retrieved CPT问题.txt as primary source. However, did not explicitly mention the "last 30 days" restriction or DSO contact requirement. | Relevant - Top result was CPT问题.txt | Partially accurate - Missing some required details |
-| 2 | What are the application materials required for Trine University and what is the minimum financial proof amount? | Must list: Resume, Transcripts (authenticated/translated), Diploma, Personal Statement (~350 words, no H1B/CPT mention), Passport/visa copies, Financial proof ($22,000 min) | System accurately listed all 6 required materials and specified $22,000 minimum financial proof. Correctly mentioned transcript authentication requirement and personal statement guidelines. Cited 申请材料.txt. | Highly relevant - Direct match to 申请材料.txt | Accurate - All key facts included |
-| 3 | What is the transfer credit policy at Trine University and when can students apply for it? | Must include: Max 6 credits, master's level courses, 3.0+ GPA first semester required, apply AFTER first semester, submit transcripts/syllabus, communicate with advisor | System correctly stated maximum 6 credits and GPA requirement. Mentioned need to apply after first semester. Retrieved 转学分问题.txt. However, did not emphasize the importance of communicating with advisor during course selection. | Relevant - Top result was 转学分问题.txt | Partially accurate - Missing advisor communication detail |
-| 4 | What are the health insurance requirements for F-1 international students at Trine and can students use their own insurance? | Must state: Mandatory through Trine, ~$1,300/year, PPO with United Health Care, waivers only for sponsored students, private insurance doesn't qualify, dental/vision add-ons available | System accurately covered all mandatory requirements including cost, provider, waiver restrictions, and add-on options. Clearly stated private insurance doesn't qualify. Cited 保险问题.txt. | Highly relevant - Direct match to 保险问题.txt | Accurate - All key facts included |
-| 5 | What is the step-by-step application process for Trine University through CISI and how long does admission take? | Must include: Register account, fill info, select CISI agent (info@cisi-edu.org), upload materials, email sharmasrijana@trine.edu + trine@cisi-edu.org, timeline (Tues/Fri contact, fastest 12 hours) | System outlined the general process but missed specific email addresses and exact timeline details. Did not mention the Tuesday/Friday contact schedule or 12-hour fastest decision. Retrieved 申请流程.txt but didn't extract all procedural details. | Partially relevant - Retrieved correct document but incomplete extraction | Partially accurate - General process correct, missing specifics |
+| #   | Question                                                                                                                     | Expected answer                                                                                                                                                                                       | System response (summarized)                                                                                                                                                                                                                           | Retrieval quality                                                         | Response accuracy                                               |
+| --- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1   | What are the CPT eligibility requirements and earliest start date at Trine University?                                       | Must include: Program Start Date vs Class Start Date distinction, can apply anytime except last 30 days, breaks don't affect CPT, only Experiential track requires CPT, contact DSO if job lost       | System correctly identified Program Start Date concept and break policy. Retrieved CPT问题.txt as primary source. However, did not explicitly mention the "last 30 days" restriction or DSO contact requirement.                                       | Relevant - Top result was CPT问题.txt                                     | Partially accurate - Missing some required details              |
+| 2   | What are the application materials required for Trine University and what is the minimum financial proof amount?             | Must list: Resume, Transcripts (authenticated/translated), Diploma, Personal Statement (~350 words, no H1B/CPT mention), Passport/visa copies, Financial proof ($22,000 min)                          | System accurately listed all 6 required materials and specified $22,000 minimum financial proof. Correctly mentioned transcript authentication requirement and personal statement guidelines. Cited 申请材料.txt.                                      | Highly relevant - Direct match to 申请材料.txt                            | Accurate - All key facts included                               |
+| 3   | What is the transfer credit policy at Trine University and when can students apply for it?                                   | Must include: Max 6 credits, master's level courses, 3.0+ GPA first semester required, apply AFTER first semester, submit transcripts/syllabus, communicate with advisor                              | System correctly stated maximum 6 credits and GPA requirement. Mentioned need to apply after first semester. Retrieved 转学分问题.txt. However, did not emphasize the importance of communicating with advisor during course selection.                | Relevant - Top result was 转学分问题.txt                                  | Partially accurate - Missing advisor communication detail       |
+| 4   | What are the health insurance requirements for F-1 international students at Trine and can students use their own insurance? | Must state: Mandatory through Trine, ~$1,300/year, PPO with United Health Care, waivers only for sponsored students, private insurance doesn't qualify, dental/vision add-ons available               | System accurately covered all mandatory requirements including cost, provider, waiver restrictions, and add-on options. Clearly stated private insurance doesn't qualify. Cited 保险问题.txt.                                                          | Highly relevant - Direct match to 保险问题.txt                            | Accurate - All key facts included                               |
+| 5   | What is the step-by-step application process for Trine University through CISI and how long does admission take?             | Must include: Register account, fill info, select CISI agent (info@cisi-edu.org), upload materials, email sharmasrijana@trine.edu + trine@cisi-edu.org, timeline (Tues/Fri contact, fastest 12 hours) | System outlined the general process but missed specific email addresses and exact timeline details. Did not mention the Tuesday/Friday contact schedule or 12-hour fastest decision. Retrieved 申请流程.txt but didn't extract all procedural details. | Partially relevant - Retrieved correct document but incomplete extraction | Partially accurate - General process correct, missing specifics |
 
 ---
 
@@ -98,7 +99,8 @@ ANSWER:
 
 **Root cause (tied to a specific pipeline stage):** This failure occurred at the **Retrieval stage**. While the correct document (申请流程.txt) was retrieved in the top-5 results, the chunk containing the detailed procedural steps with email addresses and timeline was either: (a) split across chunk boundaries due to the 512-token limit, causing loss of continuity, or (b) ranked lower than other chunks from the same document that contained more general information. The embedding model likely matched the general keywords "application process" but didn't prioritize the chunk with specific contact details. Additionally, the **Generation stage** contributed - the LLM summarized rather than extracted verbatim details, losing precision.
 
-**What you would change to fix it:** 
+**What you would change to fix it:**
+
 1. **Retrieval improvement**: Implement re-ranking to boost chunks from the same document when one procedural step is found, ensuring contiguous steps stay together. Increase top-k from 5 to 8 to capture more granular details.
 2. **Chunking improvement**: For procedural documents, use a smaller chunk size (256 tokens) with higher overlap (150 tokens) to ensure step-by-step sequences remain intact within single chunks.
 3. **Generation improvement**: Modify the system prompt to explicitly request "Extract exact email addresses, phone numbers, and timelines verbatim from the context" to prevent summarization loss.
@@ -117,23 +119,24 @@ ANSWER:
 
 **Instance 1**
 
-- *What I gave the AI:* I provided Claude 3.5 Sonnet with my "Chunking Strategy" section from planning.md (specifying 512-token chunks, 100-token overlap) and sample content from doxs/CPT问题.txt demonstrating Chinese FAQ format. I asked it to implement `chunk_text()` using LangChain's RecursiveCharacterTextSplitter.
-- *What it produced:* Claude generated a working `chunk_documents()` function but initially used character-based splitting instead of token-based, and didn't properly handle Chinese character boundaries. It also forgot to filter empty chunks.
-- *What I changed or overrode:* I replaced the character splitter with tiktoken-based token counting, added explicit UTF-8 handling for Chinese text preservation, and inserted a post-processing filter to remove chunks where `len(chunk.strip()) == 0`. I also added metadata attachment (source filename, topic category) which Claude omitted.
+- _What I gave the AI:_ I provided Claude 3.5 Sonnet with my "Chunking Strategy" section from planning.md (specifying 512-token chunks, 100-token overlap) and sample content from doxs/CPT问题.txt demonstrating Chinese FAQ format. I asked it to implement `chunk_text()` using LangChain's RecursiveCharacterTextSplitter.
+- _What it produced:_ Claude generated a working `chunk_documents()` function but initially used character-based splitting instead of token-based, and didn't properly handle Chinese character boundaries. It also forgot to filter empty chunks.
+- _What I changed or overrode:_ I replaced the character splitter with tiktoken-based token counting, added explicit UTF-8 handling for Chinese text preservation, and inserted a post-processing filter to remove chunks where `len(chunk.strip()) == 0`. I also added metadata attachment (source filename, topic category) which Claude omitted.
 
 **Instance 2**
 
-- *What I gave the AI:* I asked GitHub Copilot to autocomplete the `generate_response()` function in generation.py, providing inline comments specifying the function signature and expected behavior (build prompt with context, call Groq API, return dict with answer/sources/grounded flag).
-- *What it produced:* Copilot generated a basic implementation that called the Groq SDK correctly but made two critical errors: (1) it relied on the LLM to append source citations in the response text rather than doing it programmatically, and (2) it didn't implement the "insufficient information" detection logic.
-- *What I changed or overrode:* I completely rewrote the source attribution logic to extract unique filenames from retrieved chunks metadata and append them after the LLM response, ensuring consistent formatting regardless of model output. I also added explicit parsing of the LLM response to detect phrases like "I don't have enough information" and set the `grounded=False` flag accordingly. This structural change was necessary to meet the strict grounding requirements.
+- _What I gave the AI:_ I asked GitHub Copilot to autocomplete the `generate_response()` function in generation.py, providing inline comments specifying the function signature and expected behavior (build prompt with context, call Groq API, return dict with answer/sources/grounded flag).
+- _What it produced:_ Copilot generated a basic implementation that called the Groq SDK correctly but made two critical errors: (1) it relied on the LLM to append source citations in the response text rather than doing it programmatically, and (2) it didn't implement the "insufficient information" detection logic.
+- _What I changed or overrode:_ I completely rewrote the source attribution logic to extract unique filenames from retrieved chunks metadata and append them after the LLM response, ensuring consistent formatting regardless of model output. I also added explicit parsing of the LLM response to detect phrases like "I don't have enough information" and set the `grounded=False` flag accordingly. This structural change was necessary to meet the strict grounding requirements.
 
 ---
 
 ## Demo Video
 
-**Video Link:** [Upload to YouTube/Vimeo and insert link here]
+**Video Link:** https://vimeo.com/1199254968?share=copy&fl=sv&fe=ci
 
 **Video Contents (3-5 minutes):**
+
 - ✅ Query 1: "When can CPT start at the earliest?" - Shows successful retrieval and grounded response citing CPT问题.txt
 - ✅ Query 2: "What materials are needed for Trine admission?" - Demonstrates accurate answer with 申请材料.txt source
 - ✅ Query 3: "What is the transfer credit policy?" - Shows partial success, notes missing advisor communication detail
@@ -145,12 +148,14 @@ ANSWER:
 ## Technical Implementation Summary
 
 ### Architecture Pipeline
+
 ```
 Document Ingestion → Chunking → Embedding → Vector Store → Retrieval → Generation
      (UTF-8)      → (512/100) → (MiniLM) → (ChromaDB) → (Top-5) → (Groq Llama-3.3)
 ```
 
 ### Technology Stack
+
 - **Ingestion:** Python `open()` with UTF-8 encoding
 - **Chunking:** LangChain RecursiveCharacterTextSplitter + tiktoken
 - **Embedding:** sentence-transformers all-MiniLM-L6-v2
@@ -160,7 +165,9 @@ Document Ingestion → Chunking → Embedding → Vector Store → Retrieval →
 - **Interface:** Gradio 6.x Chatbot component
 
 ### Configuration Management
+
 All parameters centralized in `config.py`:
+
 - LLM model and API key (from .env)
 - Embedding model name
 - ChromaDB collection name and path
@@ -169,6 +176,7 @@ All parameters centralized in `config.py`:
 - Application host/port
 
 ### Key Files
+
 - `config.py` - Centralized configuration
 - `ingestion.py` - Document loading
 - `chunking.py` - Text splitting
