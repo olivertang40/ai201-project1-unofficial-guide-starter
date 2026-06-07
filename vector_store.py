@@ -9,23 +9,27 @@ import chromadb
 from chromadb.config import Settings
 from typing import List, Dict, Optional
 import os
+from config import CHROMA_COLLECTION, CHROMA_PATH
 
 
-def create_collection(collection_name: str = "trine_faq", 
+def create_collection(collection_name: str = None, 
                      reset: bool = False) -> chromadb.Collection:
     """
     Create or get a ChromaDB collection with HNSW index.
     
     Args:
-        collection_name: Name of the collection (default: "trine_faq")
+        collection_name: Name of the collection (default: from config)
         reset: If True, delete existing collection and recreate
     
     Returns:
         ChromaDB Collection instance
     """
+    if collection_name is None:
+        collection_name = CHROMA_COLLECTION
+    
     # Initialize persistent client
     client = chromadb.PersistentClient(
-        path="./chroma_db",
+        path=CHROMA_PATH,
         settings=Settings(
             anonymized_telemetry=False,
             allow_reset=True
@@ -105,14 +109,14 @@ def add_documents(collection: chromadb.Collection, chunks: List[Dict]) -> None:
 
 def search_collection(collection: chromadb.Collection, 
                      query_embedding: List[float], 
-                     k: int = 5) -> List[Dict]:
+                     k: int = None) -> List[Dict]:
     """
     Search for top-k most similar chunks using cosine similarity.
     
     Args:
         collection: ChromaDB collection instance
         query_embedding: Query embedding vector
-        k: Number of results to return (default: 5)
+        k: Number of results to return (default: from config)
     
     Returns:
         List of result dicts with keys:
@@ -121,6 +125,11 @@ def search_collection(collection: chromadb.Collection,
             - 'metadata': chunk metadata
             - 'distance': cosine distance (lower is more similar)
     """
+    from config import N_RESULTS
+    
+    if k is None:
+        k = N_RESULTS
+    
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=k,
@@ -143,7 +152,7 @@ def search_collection(collection: chromadb.Collection,
 def retrieve_relevant_chunks(collection: chromadb.Collection,
                             model,
                             query_text: str,
-                            k: int = 5) -> List[Dict]:
+                            k: int = None) -> List[Dict]:
     """
     Complete retrieval pipeline: embed query and search collection.
     
@@ -151,11 +160,16 @@ def retrieve_relevant_chunks(collection: chromadb.Collection,
         collection: ChromaDB collection instance
         model: SentenceTransformer embedding model
         query_text: User query string
-        k: Number of results to return (default: 5)
+        k: Number of results to return (default: from config)
     
     Returns:
         List of relevant chunk dicts with metadata
     """
+    from config import N_RESULTS
+    
+    if k is None:
+        k = N_RESULTS
+    
     # Embed the query
     query_embedding = model.encode(query_text).tolist()
     

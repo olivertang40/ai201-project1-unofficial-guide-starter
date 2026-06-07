@@ -6,25 +6,12 @@ from retrieved context. Implements strict grounding to prevent hallucination.
 """
 
 from groq import Groq
-from dotenv import load_dotenv
-import os
 from typing import List, Dict
+from config import GROQ_API_KEY, LLM_MODEL
 
-
-# Load environment variables
-load_dotenv()
 
 # Initialize Groq client
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-if not GROQ_API_KEY:
-    raise ValueError(
-        "GROQ_API_KEY not found in .env file. "
-        "Please create a .env file with your Groq API key.\n"
-        "Get your free API key from: https://console.groq.com/keys"
-    )
-
 _client = Groq(api_key=GROQ_API_KEY)
-LLM_MODEL = "llama-3.3-70b-versatile"
 
 
 def generate_response(query: str, retrieved_chunks: List[Dict]) -> Dict:

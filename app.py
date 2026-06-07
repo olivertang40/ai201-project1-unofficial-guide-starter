@@ -15,6 +15,15 @@ from chunking import chunk_documents
 from embedding import get_embedding_model, embed_chunks
 from vector_store import create_collection, add_documents, retrieve_relevant_chunks
 from generation import generate_response
+from config import (
+    CHROMA_COLLECTION, 
+    CHUNK_SIZE, 
+    CHUNK_OVERLAP,
+    APP_HOST,
+    APP_PORT,
+    APP_TITLE,
+    APP_DESCRIPTION
+)
 
 
 # ---------------------------------------------------------------------------
@@ -40,7 +49,7 @@ def initialize_pipeline():
         return
     
     print("\n" + "=" * 80)
-    print("Initializing Trine CISI FAQ Assistant")
+    print(f"Initializing {APP_TITLE}")
     print("=" * 80)
     
     # Step 1: Load documents
@@ -50,7 +59,7 @@ def initialize_pipeline():
     
     # Step 2: Chunk documents
     print("\n[2/5] Chunking documents...")
-    chunks = chunk_documents(docs, chunk_size=512, chunk_overlap=100)
+    chunks = chunk_documents(docs, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     print(f"✓ Created {len(chunks)} chunks")
     
     # Step 3: Load embedding model
@@ -63,7 +72,7 @@ def initialize_pipeline():
     
     # Step 5: Store in ChromaDB
     print("\n[5/5] Storing in ChromaDB...")
-    collection = create_collection(collection_name="trine_faq", reset=False)
+    collection = create_collection(collection_name=CHROMA_COLLECTION, reset=False)
     
     # Check if collection already has data
     count = collection.count()
@@ -132,16 +141,16 @@ def handle_query(question: str) -> tuple:
 
 with gr.Blocks(
     theme=gr.themes.Soft(primary_hue="blue"),
-    title="Trine CISI FAQ Assistant",
+    title=APP_TITLE,
 ) as demo:
     
-    gr.HTML("""
+    gr.HTML(f"""
         <div style="text-align:center; padding:1.25rem 0 0.5rem;">
             <h1 style="font-size:2rem; font-weight:700; color:#1e40af; margin:0;">
-                🎓 Trine University CISI FAQ Assistant
+                🎓 {APP_TITLE}
             </h1>
             <p style="color:#6b7280; font-size:1rem; margin:0.4rem 0 0;">
-                Ask questions about international student services at Trine University
+                {APP_DESCRIPTION}
             </p>
         </div>
     """)
@@ -235,11 +244,11 @@ with gr.Blocks(
 
 if __name__ == "__main__":
     print("\n" + "=" * 50)
-    print("  Trine CISI FAQ Assistant — Starting up")
+    print(f"  {APP_TITLE} — Starting up")
     print("=" * 50 + "\n")
     
     # Initialize pipeline
     initialize_pipeline()
     
     # Launch Gradio app
-    demo.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    demo.launch(server_name=APP_HOST, server_port=APP_PORT, share=False)

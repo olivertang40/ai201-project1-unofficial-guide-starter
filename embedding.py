@@ -9,18 +9,22 @@ Produces 768-dimensional vectors suitable for similarity search.
 from sentence_transformers import SentenceTransformer
 from typing import List, Dict
 import numpy as np
+from config import EMBEDDING_MODEL
 
 
-def get_embedding_model(model_name: str = "all-MiniLM-L6-v2") -> SentenceTransformer:
+def get_embedding_model(model_name: str = None) -> SentenceTransformer:
     """
     Load the sentence-transformers embedding model.
     
     Args:
-        model_name: Name of the pre-trained model (default: all-MiniLM-L6-v2)
+        model_name: Name of the pre-trained model (default: from config)
     
     Returns:
         SentenceTransformer model instance
     """
+    if model_name is None:
+        model_name = EMBEDDING_MODEL
+    
     print(f"Loading embedding model: {model_name}")
     model = SentenceTransformer(model_name)
     print(f"✓ Model loaded successfully (dimension: {model.get_sentence_embedding_dimension()})")

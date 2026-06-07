@@ -2,15 +2,16 @@
 Document Chunking Module for Trine University CISI FAQ Pipeline
 
 Splits documents into chunks using LangChain's RecursiveCharacterTextSplitter
-with configuration from planning.md:
-- chunk_size: 512 tokens
-- chunk_overlap: 100 tokens
+with configuration from config.py:
+- chunk_size: 512 tokens (from config)
+- chunk_overlap: 100 tokens (from config)
 - Special handling for Chinese text preservation
 """
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from typing import List, Dict
 import tiktoken
+from config import CHUNK_SIZE, CHUNK_OVERLAP
 
 
 def get_tokenizer():
@@ -39,226 +40,231 @@ def count_tokens(text: str) -> int:
 
 
 def chunk_documents(documents: List[Dict], 
-                   chunk_size: int = 512, 
-                   chunk_overlap: int = 100) -> List[Dict]:
+                   chunk_size: int = None, 
+                   chunk_overlap: int = None) -> List[Dict]:
     """
     Split documents into chunks using RecursiveCharacterTextSplitter.
     
     Configuration matches planning.md specifications:
-    - 512 token chunk size
-    - 100 token overlap
+    - 512 token chunk size (default from config)
+    - 100 token overlap (default from config)
     - Preserves Chinese characters and Q&A structure
     
     Args:
-        documents: List of document dicts with 'source', 'topic', 'text' keys
-        chunk_size: Target chunk size in tokens (default 512)
-        chunk_overlap: Overlap between chunks in tokens (default 100)
+        documents: List of document dicts with 'text', 'source', 'topic' keys
+        chunk_size: Size of each chunk in tokens (default: from config)
+        chunk_overlap: Overlap between chunks in tokens (default: from config)
     
     Returns:
-        List of chunk dicts with keys:
-            - 'text': chunk content
-            - 'source': original source filename
-            - 'topic': topic category
-            - 'chunk_index': index within document
-            - 'total_chunks': total chunks from this document
+        List of chunk dicts with metadata
     """
-    # Initialize the text splitter with token-based splitting
-    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        encoding_name="cl100k_base",
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-    )
+    # Use config defaults if not specified
+    if chunk_size is None:
+        chunk_size = CHUNK_SIZE
+    if chunk_overlap is None:
+        chunk_overlap = CHUNK_OVERLAP
+    
+    print(f"\nChunking documents (size={chunk_size}, overlap={chunk_overlap})...")
     
     all_chunks = []
     
-    for doc_idx, document in enumerate(documents):
-        print(f"\nChunking document {doc_idx + 1}/{len(documents)}: {document['source']}")
+    for doc_idx, doc in enumerate(documents, 1):
+        text = doc['text']
+        source = doc['source']
+        topic = doc['topic']
         
-        # Split the document into chunks
-        chunks = text_splitter.split_text(document['text'])
+        # Create splitter with token-based splitting
+        tokenizer = get_tokenizer()
         
-        # Filter out empty chunks
-        chunks = [chunk for chunk in chunks if chunk.strip()]
+        def token_length(text):
+            return len(tokenizer.encode(text))
         
-        print(f"  Created {len(chunks)} chunks")
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            length_function=token_length,
+            separators=["\n\n", "\n", "。", "？", "！", ".", "?", "!", " ", ""]
+        )
         
-        # Add metadata to each chunk
-        for chunk_idx, chunk_text in enumerate(chunks):
+        # Split document
+        split_texts = splitter.split_text(text)
+        
+        # Create chunk dicts with metadata
+        for chunk_idx, chunk_text in enumerate(split_texts):
+            # Clean chunk text
+            chunk_text = chunk_text.strip()
+            
+            # Skip empty chunks
+            if not chunk_text:
+                continue
+            
             chunk = {
                 'text': chunk_text,
-                'source': document['source'],
-                'topic': document['topic'],
+                'source': source,
+                'topic': topic,
                 'chunk_index': chunk_idx,
-                'total_chunks': len(chunks),
+                'total_chunks': len(split_texts),
                 'token_count': count_tokens(chunk_text)
             }
+            
             all_chunks.append(chunk)
+        
+        print(f"  Document {doc_idx}/{len(documents)}: {source} → {len(split_texts)} chunks")
     
     print(f"\nTotal chunks created: {len(all_chunks)}")
     return all_chunks
 
 
-def inspect_chunks(chunks: List[Dict], num_samples: int = 5):
+def inspect_chunks(chunks: List[Dict], n_samples: int = 5) -> None:
     """
-    Print sample chunks for manual inspection.
-    
-    Checks for:
-    - Readability and coherence
-    - Self-contained meaning
-    - HTML artifacts
-    - Appropriate chunk size
+    Print sample chunks for quality inspection.
     
     Args:
-        chunks: List of chunk dictionaries
-        num_samples: Number of random chunks to display (default 5)
+        chunks: List of chunk dicts
+        n_samples: Number of samples to print (default: 5)
     """
     import random
     
     print("\n" + "=" * 80)
-    print(f"CHUNK INSPECTION - {num_samples} Random Samples")
+    print(f"INSPECTING {n_samples} RANDOM CHUNKS")
     print("=" * 80)
     
     # Select random samples
-    if len(chunks) <= num_samples:
+    if len(chunks) <= n_samples:
         samples = chunks
     else:
-        samples = random.sample(chunks, num_samples)
+        samples = random.sample(chunks, n_samples)
     
     for i, chunk in enumerate(samples, 1):
         print(f"\n{'─' * 80}")
-        print(f"Sample {i}/{num_samples}")
+        print(f"Sample {i}:")
         print(f"{'─' * 80}")
         print(f"Source: {chunk['source']}")
         print(f"Topic: {chunk['topic']}")
         print(f"Chunk Index: {chunk['chunk_index']}/{chunk['total_chunks'] - 1}")
         print(f"Token Count: {chunk['token_count']}")
-        print(f"\nContent Preview:")
-        print(f"{'─' * 40}")
-        
-        # Show first 300 characters
-        preview_length = min(300, len(chunk['text']))
-        print(chunk['text'][:preview_length])
-        
-        if len(chunk['text']) > preview_length:
-            print("...")
-        
-        # Check for potential issues
-        issues = []
-        if len(chunk['text'].strip()) == 0:
-            issues.append("⚠ EMPTY CHUNK")
-        if '&amp;' in chunk['text'] or '&lt;' in chunk['text'] or '&nbsp;' in chunk['text']:
-            issues.append("⚠ HTML ENTITIES DETECTED")
-        if chunk['token_count'] < 50:
-            issues.append("⚠ VERY SHORT CHUNK (< 50 tokens)")
-        if chunk['token_count'] > 600:
-            issues.append("⚠ VERY LONG CHUNK (> 600 tokens)")
-        
-        if issues:
-            print(f"\nIssues: {' | '.join(issues)}")
-        else:
-            print(f"\n✓ Chunk looks good")
-    
-    print("\n" + "=" * 80)
+        print(f"\nContent:\n{chunk['text']}")
 
 
 def validate_chunks(chunks: List[Dict]) -> Dict:
     """
-    Validate chunk quality and provide statistics.
+    Validate chunk quality and detect common issues.
     
     Args:
-        chunks: List of chunk dictionaries
+        chunks: List of chunk dicts
     
     Returns:
-        Dictionary with validation statistics
+        Validation report dict
     """
-    if not chunks:
-        return {"error": "No chunks to validate"}
-    
-    token_counts = [chunk['token_count'] for chunk in chunks]
-    
-    stats = {
+    report = {
         'total_chunks': len(chunks),
-        'total_documents': len(set(chunk['source'] for chunk in chunks)),
-        'avg_tokens': sum(token_counts) / len(token_counts),
-        'min_tokens': min(token_counts),
-        'max_tokens': max(token_counts),
-        'empty_chunks': sum(1 for chunk in chunks if not chunk['text'].strip()),
-        'html_artifacts': sum(1 for chunk in chunks if any(entity in chunk['text'] for entity in ['&amp;', '&lt;', '&nbsp;'])),
-        'too_short': sum(1 for count in token_counts if count < 50),
-        'too_long': sum(1 for count in token_counts if count > 600),
+        'empty_chunks': 0,
+        'html_artifacts': 0,
+        'too_short': 0,
+        'too_long': 0,
+        'avg_token_count': 0,
+        'issues': []
     }
     
-    return stats
+    if not chunks:
+        report['issues'].append("No chunks to validate!")
+        return report
+    
+    total_tokens = 0
+    
+    for chunk in chunks:
+        text = chunk['text']
+        token_count = chunk.get('token_count', count_tokens(text))
+        
+        # Check for empty chunks
+        if not text or len(text.strip()) == 0:
+            report['empty_chunks'] += 1
+            report['issues'].append(f"Empty chunk found from {chunk['source']}")
+        
+        # Check for HTML artifacts
+        html_patterns = ['<div', '<span', '&amp;', '&nbsp;', '&lt;', '&gt;']
+        if any(pattern in text for pattern in html_patterns):
+            report['html_artifacts'] += 1
+            report['issues'].append(f"HTML artifact in chunk from {chunk['source']}")
+        
+        # Check token count
+        if token_count < 50:
+            report['too_short'] += 1
+        elif token_count > 600:
+            report['too_long'] += 1
+        
+        total_tokens += token_count
+    
+    # Calculate average
+    report['avg_token_count'] = total_tokens / len(chunks) if chunks else 0
+    
+    # Add warnings
+    if report['total_chunks'] < 50:
+        report['issues'].append(
+            f"WARNING: Only {report['total_chunks']} chunks total (< 50). "
+            f"Chunks may be too large for precise retrieval."
+        )
+    elif report['total_chunks'] > 2000:
+        report['issues'].append(
+            f"WARNING: {report['total_chunks']} chunks total (> 2000). "
+            f"Chunks may be too small, carrying insufficient semantic signal."
+        )
+    
+    if report['empty_chunks'] > 0:
+        report['issues'].append(
+            f"Found {report['empty_chunks']} empty chunks. "
+            f"Add len(chunk) > 0 filter or check document loading."
+        )
+    
+    if report['html_artifacts'] > 0:
+        report['issues'].append(
+            f"Found {report['html_artifacts']} chunks with HTML artifacts. "
+            f"Improve cleaning before chunking."
+        )
+    
+    if report['too_short'] > len(chunks) * 0.1:
+        report['issues'].append(
+            f"{report['too_short']} chunks are very short (< 50 tokens). "
+            f"Consider larger chunk sizes."
+        )
+    
+    return report
 
 
 if __name__ == '__main__':
-    # Test the chunking pipeline
+    # Test chunking on sample documents
     from ingestion import load_all_documents
     
     print("=" * 80)
-    print("Testing Document Chunking Pipeline")
+    print("Testing Chunking Module")
     print("=" * 80)
     
     # Load documents
-    print("\nStep 1: Loading documents...")
-    documents = load_all_documents()
+    docs = load_all_documents()
     
     # Chunk documents
-    print("\nStep 2: Chunking documents...")
-    chunks = chunk_documents(documents, chunk_size=512, chunk_overlap=100)
+    chunks = chunk_documents(docs)
     
-    # Inspect sample chunks
-    print("\nStep 3: Inspecting chunks...")
-    inspect_chunks(chunks, num_samples=5)
+    # Inspect samples
+    inspect_chunks(chunks, n_samples=5)
     
-    # Validate chunks
-    print("\nStep 4: Validating chunk quality...")
-    stats = validate_chunks(chunks)
-    
+    # Validate quality
     print("\n" + "=" * 80)
-    print("CHUNK VALIDATION STATISTICS")
-    print("=" * 80)
-    print(f"Total chunks: {stats['total_chunks']}")
-    print(f"Total documents: {stats['total_documents']}")
-    print(f"Average tokens per chunk: {stats['avg_tokens']:.1f}")
-    print(f"Min tokens: {stats['min_tokens']}")
-    print(f"Max tokens: {stats['max_tokens']}")
-    print(f"Empty chunks: {stats['empty_chunks']}")
-    print(f"HTML artifacts: {stats['html_artifacts']}")
-    print(f"Too short (<50 tokens): {stats['too_short']}")
-    print(f"Too long (>600 tokens): {stats['too_long']}")
-    
-    # Quality check
-    print("\n" + "=" * 80)
-    print("QUALITY CHECK")
+    print("VALIDATION REPORT")
     print("=" * 80)
     
-    if stats['total_chunks'] < 50:
-        print("⚠ WARNING: Fewer than 50 chunks - chunks may be too large")
-    elif stats['total_chunks'] > 2000:
-        print("⚠ WARNING: More than 2000 chunks - chunks may be too small")
+    report = validate_chunks(chunks)
+    
+    print(f"\nTotal Chunks: {report['total_chunks']}")
+    print(f"Average Token Count: {report['avg_token_count']:.1f}")
+    print(f"Empty Chunks: {report['empty_chunks']}")
+    print(f"HTML Artifacts: {report['html_artifacts']}")
+    print(f"Too Short (<50): {report['too_short']}")
+    print(f"Too Long (>600): {report['too_long']}")
+    
+    if report['issues']:
+        print(f"\nIssues Found:")
+        for issue in report['issues']:
+            print(f"  ⚠ {issue}")
     else:
-        print(f"✓ Chunk count ({stats['total_chunks']}) is in acceptable range (50-2000)")
-    
-    if stats['empty_chunks'] > 0:
-        print(f"⚠ WARNING: Found {stats['empty_chunks']} empty chunks")
-    else:
-        print("✓ No empty chunks")
-    
-    if stats['html_artifacts'] > 0:
-        print(f"⚠ WARNING: Found {stats['html_artifacts']} chunks with HTML artifacts")
-    else:
-        print("✓ No HTML artifacts detected")
-    
-    if stats['too_short'] > 0:
-        print(f"⚠ WARNING: {stats['too_short']} chunks are very short (<50 tokens)")
-    
-    if stats['too_long'] > 0:
-        print(f"⚠ WARNING: {stats['too_long']} chunks are very long (>600 tokens)")
-    
-    if stats['avg_tokens'] < 200:
-        print(f"⚠ WARNING: Average chunk size ({stats['avg_tokens']:.0f}) is quite small")
-    elif stats['avg_tokens'] > 550:
-        print(f"⚠ WARNING: Average chunk size ({stats['avg_tokens']:.0f}) is quite large")
-    else:
-        print(f"✓ Average chunk size ({stats['avg_tokens']:.0f} tokens) is reasonable")
+        print("\n✓ No issues detected!")

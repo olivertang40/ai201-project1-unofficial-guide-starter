@@ -9,6 +9,7 @@ Returns cleaned text strings with metadata for downstream chunking.
 
 import os
 from typing import List, Dict
+from config import DOCS_PATH
 
 
 def load_text_file(filepath: str, encoding: str = 'utf-8') -> str:
@@ -29,100 +30,128 @@ def load_text_file(filepath: str, encoding: str = 'utf-8') -> str:
 
 def clean_text(text: str) -> str:
     """
-    Clean text by removing HTML entities, extra whitespace, and artifacts.
+    Clean raw text by removing HTML entities and unnecessary whitespace.
+    
+    Removes:
+    - HTML entities (&nbsp;, &amp;, &lt;, &gt;, etc.)
+    - Multiple consecutive blank lines
+    - Leading/trailing whitespace
+    
+    Keeps:
+    - Actual content (questions, answers, descriptions)
+    - Single line breaks for readability
     
     Args:
         text: Raw text content
     
     Returns:
-        Cleaned text ready for chunking
+        Cleaned text string
     """
+    import re
+    
     # Replace common HTML entities
-    replacements = {
+    html_entities = {
         '&nbsp;': ' ',
         '&amp;': '&',
         '&lt;': '<',
         '&gt;': '>',
-        '&#39;': "'",
         '&quot;': '"',
+        '&#39;': "'",
+        '&mdash;': '—',
+        '&ndash;': '–',
+        '&hellip;': '…',
     }
     
-    for entity, replacement in replacements.items():
+    for entity, replacement in html_entities.items():
         text = text.replace(entity, replacement)
     
-    # Remove multiple consecutive blank lines
-    while '\n\n\n' in text:
-        text = text.replace('\n\n\n', '\n\n')
+    # Remove multiple consecutive blank lines (keep max 2)
+    text = re.sub(r'\n{3,}', '\n\n', text)
     
-    return text.strip()
+    # Strip leading/trailing whitespace from each line
+    lines = [line.strip() for line in text.split('\n')]
+    text = '\n'.join(lines)
+    
+    # Final cleanup
+    text = text.strip()
+    
+    return text
 
 
-def load_all_documents(doxs_dir: str = 'doxs') -> List[Dict]:
+def load_all_documents(doxs_dir: str = None) -> List[Dict]:
     """
-    Load all documents from doxs/ directory.
-    
-    All 10 topic files are pre-collected and stored locally:
-    - 学校资质.txt (School Accreditation)
-    - 申请相关.txt (Application Related)
-    - 申请材料.txt (Application Materials)
-    - 奖学金问题.txt (Scholarship Questions)
-    - 转学分问题.txt (Transfer Credit Questions)
-    - CPT问题.txt (CPT Questions)
-    - 身份问题.txt (Immigration Status Questions)
-    - Onsite问题.txt (Onsite Course Questions)
-    - 保险问题.txt (Insurance Questions)
-    - 申请流程.txt (Application Process)
+    Load all documents from the doxs directory.
     
     Args:
-        doxs_dir: Path to directory containing topic text files
+        doxs_dir: Path to documents directory (default: from config)
     
     Returns:
-        List of dictionaries with keys:
-            - 'source': source filename
-            - 'topic': topic category
-            - 'text': cleaned text content
+        List of document dicts with keys:
+            - 'text': Cleaned text content
+            - 'source': Filename
+            - 'topic': Topic category (derived from filename)
     """
+    if doxs_dir is None:
+        doxs_dir = DOCS_PATH
+    
+    if not os.path.exists(doxs_dir):
+        raise FileNotFoundError(f"Documents directory not found: {doxs_dir}")
+    
     documents = []
     
-    # Load all text files from doxs/ directory
-    if os.path.exists(doxs_dir):
-        for filename in sorted(os.listdir(doxs_dir)):
-            if filename.endswith('.txt'):
-                filepath = os.path.join(doxs_dir, filename)
-                topic_name = filename.replace('.txt', '')
-                
-                print(f"Loading: {filename}")
-                raw_text = load_text_file(filepath)
-                cleaned_text = clean_text(raw_text)
-                
-                documents.append({
-                    'source': filename,
-                    'topic': topic_name,
-                    'text': cleaned_text
-                })
-                print(f"  [OK] Loaded {len(cleaned_text)} characters")
-    else:
-        print(f"[WARN] Directory '{doxs_dir}' not found!")
+    # Get all .txt files
+    txt_files = [f for f in os.listdir(doxs_dir) if f.endswith('.txt')]
+    
+    if not txt_files:
+        raise ValueError(f"No .txt files found in {doxs_dir}")
+    
+    print(f"\nLoading {len(txt_files)} documents from {doxs_dir}/...")
+    
+    for filename in sorted(txt_files):
+        filepath = os.path.join(doxs_dir, filename)
+        
+        try:
+            # Load raw text
+            raw_text = load_text_file(filepath, encoding='utf-8')
+            
+            # Clean text
+            cleaned_text = clean_text(raw_text)
+            
+            # Extract topic from filename (remove .txt extension)
+            topic = filename.replace('.txt', '')
+            
+            # Create document dict
+            doc = {
+                'text': cleaned_text,
+                'source': filename,
+                'topic': topic
+            }
+            
+            documents.append(doc)
+            print(f"  [OK] Loaded {filename} ({len(cleaned_text)} characters)")
+            
+        except Exception as e:
+            print(f"  [ERROR] Failed to load {filename}: {str(e)}")
     
     print(f"\nTotal documents loaded: {len(documents)}")
     return documents
 
 
 if __name__ == '__main__':
-    # Test the ingestion pipeline
+    # Test ingestion
     print("=" * 80)
-    print("Testing Document Ingestion Pipeline")
+    print("Testing Document Ingestion")
     print("=" * 80)
     
     docs = load_all_documents()
     
     print("\n" + "=" * 80)
-    print("Sample Document Preview (first 500 chars):")
+    print("SAMPLE DOCUMENT PREVIEW")
     print("=" * 80)
+    
     if docs:
-        sample_doc = docs[0]
-        print(f"\nSource: {sample_doc['source']}")
-        print(f"Topic: {sample_doc['topic']}")
-        print(f"Length: {len(sample_doc['text'])} characters")
-        print("\nPreview:")
-        print(sample_doc['text'][:500])
+        sample = docs[0]
+        print(f"\nSource: {sample['source']}")
+        print(f"Topic: {sample['topic']}")
+        print(f"Length: {len(sample['text'])} characters")
+        print(f"\nPreview:\n{sample['text'][:500]}...")
