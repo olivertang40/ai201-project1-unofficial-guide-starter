@@ -8,10 +8,17 @@
 [![Course](https://img.shields.io/badge/Course-CodePath%20AI201-purple.svg)](https://www.codepath.org/)
 [![Demo](https://img.shields.io/badge/Demo-Vimeo-blueviolet.svg)](https://vimeo.com/1199254968)
 
+<p align="center">
+  <strong>RAG System for Trine University International Students</strong><br/>
+  <em>Provides grounded answers on admissions, CPT/OPT, scholarships, insurance using 10 FAQ documents</em><br/>
+  <sub>Built with Python • ChromaDB • Groq LLM • Gradio UI</sub>
+</p>
+
 > **Project:** Trine CISI FAQ Assistant  
 > **Author:** Oliver Tang
 > **Date:** June 2026  
 > **Milestone:** Complete (Milestones 1-6)
+> **Demo:** [Watch on Vimeo (4m 32s)](https://vimeo.com/1199254968)
 
 ---
 
@@ -331,7 +338,7 @@ All parameters centralized in `config.py`:
 4. **Onsite问题.txt** (distance: 1.664) - On-campus course requirements
 5. **保险问题.txt** (distance: 1.677) - Health insurance enrollment timing
 
-**Why these chunks are relevant:** The top result from CPT问题.txt directly addresses the query by explaining that CPT can begin on the Program Start Date (orientation date, e.g., 8/8/2022) rather than the Class Start Date (e.g., 8/22/2022). This is the exact information needed to answer "earliest start date." The second chunk reinforces this by clarifying that breaks don't affect CPT eligibility, which is important context for students planning their work authorization timeline.
+**Why these chunks are relevant:** The top result from CPT問題.txt directly addresses the query by explaining that CPT can begin on the Program Start Date (orientation date, e.g., 8/8/2022) rather than the Class Start Date (e.g., 8/22/2022). This is the exact information needed to answer "earliest start date." The second chunk reinforces this by clarifying that breaks don't affect CPT eligibility, which is important context for students planning their work authorization timeline.
 
 ---
 
@@ -355,7 +362,7 @@ All parameters centralized in `config.py`:
 2. **CPT问题.txt** (distance: 1.534) - CPT work authorization (tangentially related)
 3. **学校资质.txt** (distance: 1.555) - School accreditation (background info)
 4. **申请相关.txt** (distance: 1.608) - General application questions
-5. **CPT问题.txt** (distance: 1.623) - Additional CPT details
+5. **CPT問題.txt** (distance: 1.623) - Additional CPT details
 
 **Why these chunks are relevant:** The top result from 申请流程.txt contains the exact procedural steps: register account → fill personal info → select CISI agent → upload materials → email admissions officer. However, while the document was retrieved correctly, the LLM response lost some specific details (exact email addresses sharmasrijana@trine.edu and trine@cisi-edu.org, Tuesday/Friday contact schedule, 12-hour fastest timeline) due to summarization during generation. This illustrates a key limitation: successful retrieval doesn't guarantee complete extraction if information spans chunk boundaries or if the LLM compresses details.
 
