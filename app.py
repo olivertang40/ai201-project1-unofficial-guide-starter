@@ -176,10 +176,10 @@ with gr.Blocks(title=APP_TITLE) as demo:
             examples = gr.Examples(
                 examples=[
                     ["When can CPT start at the earliest?"],
-                    ["What application materials are required? How much financial proof is needed?"],
+                    ["What materials are needed for Trine admission application?"],
                     ["What is the transfer credit policy? How many credits can be transferred?"],
                     ["How is the health insurance provided by the school? What's the cost?"],
-                    ["What is the application process? What are the benefits of applying through CISI?"],
+                    ["What is the CISI application process and its benefits?"],
                     ["How are Onsite course schedules arranged?"],
                     ["How long is the I-20 validity period?"],
                     ["Does Trine offer scholarships?"],
@@ -189,31 +189,32 @@ with gr.Blocks(title=APP_TITLE) as demo:
         
         with gr.Column(scale=1, min_width=200):
             gr.HTML("""
-                <div style="background:#eff6ff; border:1px solid #bfdbfe;
+                <div style="background:#1e293b; border:1px solid #475569;
                             border-radius:10px; padding:1rem; margin-top:0.5rem;">
-                    <p style="font-size:0.8rem; font-weight:700; color:#1e40af;
+                    <p style="font-size:0.8rem; font-weight:700; color:#f1f5f9;
                                margin:0 0 0.5rem; letter-spacing:0.05em;">
                         📚 KNOWLEDGE BASE
                     </p>
-                    <ul style="font-size:0.85rem; color:#1e3a8a; list-style:none;
+                    <ul style="font-size:0.85rem; color:#e2e8f0; list-style:none;
                                 padding:0; margin:0; line-height:1.8;">
-                        <li>📋 CPT Questions</li>
-                        <li>📝 Application Process</li>
-                        <li>📄 Application Materials</li>
-                        <li>💰 Insurance Questions</li>
-                        <li>🎓 Transfer Credit Questions</li>
-                        <li>🏫 Onsite Questions</li>
-                        <li>🛂 Status/Visa Questions</li>
-                        <li>🏆 Scholarship Questions</li>
+                        <li> CPT Policy & Usage</li>
+                        <li>📝 CISI Application Process</li>
+                        <li>📄 Admission Materials (NOT CPT)</li>
+                        <li> Insurance Questions</li>
+                        <li> Transfer Credit Policy</li>
+                        <li>🏫 Onsite Course Schedule</li>
+                        <li>🛂 Visa/Status Questions</li>
+                        <li>🏆 Scholarship Info</li>
                     </ul>
-                    <hr style="border:none; border-top:1px solid #bfdbfe; margin:0.75rem 0;">
-                    <p style="font-size:0.75rem; color:#2563eb; margin:0; line-height:1.5;">
+                    <hr style="border:none; border-top:1px solid #475569; margin:0.75rem 0;">
+                    <p style="font-size:0.75rem; color:#cbd5e1; margin:0; line-height:1.5;">
+                        ⚠️ Note: "Application Materials" refers to Trine admission, not CPT work authorization.<br>
                         Answers are grounded in CISI FAQ documents only. 
                         If information isn't in the documents, the assistant will say so.
                     </p>
                 </div>
             """)
-            
+
             # Sources display box
             with gr.Accordion("📖 Retrieved Sources", open=False):
                 sources_output = gr.Textbox(
@@ -229,22 +230,22 @@ with gr.Blocks(title=APP_TITLE) as demo:
         # Format response with sources
         formatted_response = f"{answer}\n\n---\n**Sources:**\n{sources}"
         
-        chat_history.append((message, formatted_response))
+        # Gradio 6.0 requires messages format: list of dicts with 'role' and 'content'
+        if chat_history is None:
+            chat_history = []
+        
+        chat_history.append({"role": "user", "content": message})
+        chat_history.append({"role": "assistant", "content": formatted_response})
+        
         return "", chat_history, sources
 
     msg.submit(respond, [msg, chatbot], [msg, chatbot, sources_output])
     
-    clear.click(lambda: None, None, chatbot, queue=False)
-
-
-if __name__ == "__main__":
-    print("\n" + "=" * 50)
-    print(f"  {APP_TITLE} — Starting up")
-    print("=" * 50 + "\n")
+    def clear_chat():
+        return [], ""
     
-    # Initialize pipeline
-    initialize_pipeline()
-    
+    clear.click(clear_chat, None, [chatbot, sources_output], queue=False)
+
     # Launch Gradio app with theme parameter in launch()
     demo.launch(
         server_name=APP_HOST, 
