@@ -1,5 +1,13 @@
 # The Unofficial Guide — Project 1
 
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![Gradio](https://img.shields.io/badge/Gradio-6.x-orange.svg)](https://gradio.app/)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-%3E%3D0.6.0-green.svg)](https://www.trychroma.com/)
+[![Groq](https://img.shields.io/badge/Groq-Llama--3.3-red.svg)](https://groq.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Course](https://img.shields.io/badge/Course-CodePath%20AI201-purple.svg)](https://www.codepath.org/)
+[![Demo](https://img.shields.io/badge/Demo-Vimeo-blueviolet.svg)](https://vimeo.com/1199254968)
+
 > **Project:** Trine CISI FAQ Assistant  
 > **Author:** Oliver Tang
 > **Date:** June 2026  
@@ -336,7 +344,7 @@ All parameters centralized in `config.py`:
 4. **学校资质.txt** (distance: 1.388) - University accreditation info
 5. **保险问题.txt** (distance: 1.415) - Insurance cost (~$1,300/year)
 
-**Why these chunks are relevant:** Although 申请材料.txt ranked #3 (not #1), it contains the critical information: "不低于$22000 （非本人名下的财务文件需要额外的支持信【模板】）". The semantic match worked because "financial proof" aligns with "财力证明" in Chinese. The system successfully extracted all 6 required materials including resume, transcripts, diploma, personal statement, passport/visa copies, and the exact $22,000 minimum. This demonstrates cross-language retrieval capability despite the embedding model being primarily English-trained.
+**Why these chunks are relevant:** Although 申请材料.txt ranked #3 (not #1), it contains the critical information: "不低于$22000 （非本人名下的财务文件需要额外的支持信【模板】"). The semantic match worked because "financial proof" aligns with "财力证明" in Chinese. The system successfully extracted all 6 required materials including resume, transcripts, diploma, personal statement, passport/visa copies, and the exact $22,000 minimum. This demonstrates cross-language retrieval capability despite the embedding model being primarily English-trained.
 
 ---
 
