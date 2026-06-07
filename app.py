@@ -139,10 +139,7 @@ def handle_query(question: str) -> tuple:
 # Gradio UI
 # ---------------------------------------------------------------------------
 
-with gr.Blocks(
-    theme=gr.themes.Soft(primary_hue="blue"),
-    title=APP_TITLE,
-) as demo:
+with gr.Blocks(title=APP_TITLE) as demo:
     
     gr.HTML(f"""
         <div style="text-align:center; padding:1.25rem 0 0.5rem;">
@@ -157,35 +154,37 @@ with gr.Blocks(
     
     with gr.Row():
         with gr.Column(scale=3):
-            gr.ChatInterface(
-                fn=handle_query,
-                type="messages",
-                chatbot=gr.Chatbot(
-                    height=500,
-                    type="messages",
-                    placeholder=(
-                        "<div style='text-align:center; color:#9ca3af; margin-top:3rem;'>"
-                        "Ask a question about CPT, applications, insurance, etc.<br>"
-                        "Example: When can CPT start?"
-                        "</div>"
-                    ),
+            chatbot = gr.Chatbot(
+                label="Assistant",
+                height=500,
+                placeholder=(
+                    "<div style='text-align:center; color:#9ca3af; margin-top:3rem;'>"
+                    "Ask a question about CPT, applications, insurance, etc.<br>"
+                    "Example: When can CPT start?"
+                    "</div>"
                 ),
-                textbox=gr.Textbox(
-                    placeholder='For example: "What materials are needed for CPT application?" or "What is the transfer credit policy?"',
-                    container=False,
-                    scale=7,
-                ),
+            )
+            
+            msg = gr.Textbox(
+                placeholder='For example: "What materials are needed for CPT application?" or "What is the transfer credit policy?"',
+                label="Your Question",
+                scale=7,
+            )
+            
+            clear = gr.Button("Clear")
+            
+            examples = gr.Examples(
                 examples=[
-                    "When can CPT start at the earliest?",
-                    "What application materials are required? How much financial proof is needed?",
-                    "What is the transfer credit policy? How many credits can be transferred?",
-                    "How is the health insurance provided by the school? What's the cost?",
-                    "What is the application process? What are the benefits of applying through CISI?",
-                    "How are Onsite course schedules arranged?",
-                    "How long is the I-20 validity period?",
-                    "Does Trine offer scholarships?",
+                    ["When can CPT start at the earliest?"],
+                    ["What application materials are required? How much financial proof is needed?"],
+                    ["What is the transfer credit policy? How many credits can be transferred?"],
+                    ["How is the health insurance provided by the school? What's the cost?"],
+                    ["What is the application process? What are the benefits of applying through CISI?"],
+                    ["How are Onsite course schedules arranged?"],
+                    ["How long is the I-20 validity period?"],
+                    ["Does Trine offer scholarships?"],
                 ],
-                cache_examples=False,
+                inputs=msg,
             )
         
         with gr.Column(scale=1, min_width=200):
@@ -221,25 +220,21 @@ with gr.Blocks(
                     label="Sources",
                     lines=8,
                     interactive=False,
-                    show_copy_button=True,
                 )
     
-    # Custom handler to capture sources
-    def chat_with_sources(message, history):
+    # Chat functionality
+    def respond(message, chat_history):
         answer, sources = handle_query(message)
         
-        # Format for chat display
-        formatted_answer = f"{answer}\n\n---\n**Sources:**\n{sources}"
+        # Format response with sources
+        formatted_response = f"{answer}\n\n---\n**Sources:**\n{sources}"
         
-        return formatted_answer, sources
+        chat_history.append((message, formatted_response))
+        return "", chat_history, sources
+
+    msg.submit(respond, [msg, chatbot], [msg, chatbot, sources_output])
     
-    # Override the chat interface to show sources separately
-    chatbot = gr.Chatbot(
-        elem_id="chatbot",
-        height=500,
-        type="messages",
-        visible=False,  # Hide default, we'll use custom logic
-    )
+    clear.click(lambda: None, None, chatbot, queue=False)
 
 
 if __name__ == "__main__":
@@ -250,5 +245,10 @@ if __name__ == "__main__":
     # Initialize pipeline
     initialize_pipeline()
     
-    # Launch Gradio app
-    demo.launch(server_name=APP_HOST, server_port=APP_PORT, share=False)
+    # Launch Gradio app with theme parameter in launch()
+    demo.launch(
+        server_name=APP_HOST, 
+        server_port=APP_PORT, 
+        share=False,
+        theme=gr.themes.Soft(primary_hue="blue")
+    )
