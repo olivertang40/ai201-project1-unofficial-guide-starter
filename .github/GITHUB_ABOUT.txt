@@ -1,0 +1,1 @@
+RAG system for Trine University international students. Provides grounded answers on admissions, CPT/OPT, scholarships, insurance using 10 FAQ documents. Built with Python, ChromaDB, Groq LLM, and Gradio UI. Course project for CodePath AI201. | Demo: https://vimeo.com/1199254968
