@@ -18,3 +18,7 @@ chroma/
 
 # macOS
 .DS_Store
+
+# Development verification files (temporary)
+verify_milestone*.py
+MILESTONE*_COMPLIANCE_REPORT.md
