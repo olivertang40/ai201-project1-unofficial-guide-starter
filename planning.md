@@ -20,7 +20,7 @@
 
 | # | Source | Description | URL or location |
 |---|--------|-------------|-----------------|
-| 1 | CISI Trine University FAQ - School Accreditation | Official accreditation information including HLC, SEVP, and Chinese Ministry of Education recognition | https://www.cisi-edu.org/trine-university-application-popular-questions-authoritative-interpretation-of-the-university/ |
+| 1 | CISI Trine University FAQ - School Accreditation | Official accreditation information including HLC, SEVP, and Chinese Ministry of Education recognition | doxs/学校认证.txt |
 | 2 | CISI Trine University FAQ - Application Related Questions | Comprehensive Q&A about offer acceptance, campus differences, transfer policies, timeline recommendations, and program structure | doxs/申请相关.txt |
 | 3 | CISI Trine University FAQ - Application Materials | Detailed requirements for transcripts, financial proof ($22,000 minimum), resume, personal statement (350 words), and document authentication | doxs/申请材料.txt |
 | 4 | CISI Trine University FAQ - Scholarship Information | Graduate scholarship policies and availability | doxs/奖学金问题.txt |
@@ -104,9 +104,7 @@
 ```
 graph TD
     subgraph S1["Stage 1: Document Ingestion"]
-        A1["CISI Website<br/>BeautifulSoup4"] 
-        A2["doxs/ Topic Files<br/>UTF-8 Text Reader"]
-        A3["Python requests<br/>HTTP Downloads"]
+        A1["doxs/ Directory<br/>10 Topic Files<br/>UTF-8 Text Reader"]
     end
     
     subgraph S2["Stage 2: Chunking"]
@@ -135,8 +133,6 @@ graph TD
     end
     
     A1 --> INGEST["Ingest & Clean<br/>Text Strings"]
-    A2 --> INGEST
-    A3 --> INGEST
     
     INGEST --> B1
     B1 --> B2
@@ -165,7 +161,7 @@ graph TD
 
 **Pipeline Flow Explanation:**
 
-1. **Document Ingestion**: Reads 10 sources (1 CISI webpage via BeautifulSoup4, 9 Chinese text files from `doxs/` directory using UTF-8 encoding) and outputs cleaned text strings with metadata (source name, topic category).
+1. **Document Ingestion**: Reads 10 Chinese FAQ topic files from `doxs/` directory using UTF-8 encoding and outputs cleaned text strings with metadata (source filename, topic category). No web scraping required - all content is pre-collected locally.
 
 2. **Chunking**: Uses LangChain's RecursiveCharacterTextSplitter configured for 512-token chunks with 100-token overlap. Special handling ensures Chinese characters aren't split mid-word and Q&A pairs stay together when possible.
 
@@ -176,7 +172,7 @@ graph TD
 5. **Generation**: Retrieved chunks are formatted into a system prompt with source citations. Groq API (Llama-3-70b-8192) generates a grounded response at temperature=0.3 for factual consistency, citing which FAQ topics provided the information.
 
 **Technology Stack Summary:**
-- **Ingestion**: `beautifulsoup4`, `requests`, Python built-in `open()` with `encoding='utf-8'`
+- **Ingestion**: Python built-in `open()` with `encoding='utf-8'`
 - **Chunking**: `langchain-text-splitters` (RecursiveCharacterTextSplitter), `tiktoken` for token counting
 - **Embedding**: `sentence-transformers==3.4.1` (all-MiniLM-L6-v2)
 - **Vector Store**: `chromadb>=0.6.0` (persistent client with HNSW index)
@@ -199,12 +195,12 @@ graph TD
 
 **Milestone 3 — Ingestion and chunking:**
 
-I will use **Claude 3.5 Sonnet** to implement the ingestion and chunking modules. I'll provide it with: (1) the "Documents" table listing all 10 sources (1 URL + 9 local text files in doxs/ directory), (2) the "Chunking Strategy" section specifying 512-token chunks with 100-token overlap, and (3) sample content from doxs/CPT问题.txt and doxs/申请材料.txt to demonstrate Chinese FAQ format. I expect Claude to produce: `ingestion.py` with functions `load_text_file(filepath)` for reading Chinese text files and `scrape_webpage(url)` for the CISI accreditation page, both returning cleaned text strings with proper UTF-8 encoding handling. Plus `chunking.py` with `chunk_text(text, chunk_size=512, overlap=100)` using LangChain's RecursiveCharacterTextSplitter configured for token-based splitting that preserves Chinese characters properly. I'll verify the output by: running the chunking function on doxs/CPT问题.txt (approximately 2000 tokens) and confirming it produces 4-5 chunks with proper overlap (checking that the last 100 tokens of chunk N match the first 100 tokens of chunk N+1), ensuring Chinese characters are not split mid-word, and verifying that Q&A pairs remain intact within chunks where possible.
+I will use **Claude 3.5 Sonnet** to implement the ingestion and chunking modules. I'll provide it with: (1) the "Documents" table listing all 10 local text files in doxs/ directory, (2) the "Chunking Strategy" section specifying 512-token chunks with 100-token overlap, and (3) sample content from doxs/CPT问题.txt and doxs/申请材料.txt to demonstrate Chinese FAQ format. I expect Claude to produce: `ingestion.py` with function `load_text_file(filepath)` for reading Chinese text files with UTF-8 encoding, plus `chunking.py` with `chunk_text(text, chunk_size=512, overlap=100)` using LangChain's RecursiveCharacterTextSplitter configured for token-based splitting that preserves Chinese characters properly. I'll verify the output by: running the chunking function on doxs/CPT问题.txt (approximately 500 tokens) and confirming it produces 1-2 chunks with proper overlap (checking that the last 100 tokens of chunk N match the first 100 tokens of chunk N+1), ensuring Chinese characters are not split mid-word, and verifying that Q&A pairs remain intact within chunks where possible.
 
 **Milestone 4 — Embedding and retrieval:**
 
-I will use **GitHub Copilot** (with GPT-4 backend) paired with manual testing to build the embedding and vector store components. I'll provide Copilot with: (1) the "Retrieval Approach" section specifying all-MiniLM-L6-v2 and top-k=5, (2) the Architecture diagram showing ChromaDB integration, and (3) inline comments in the code specifying function signatures like `embed_texts(texts: List[str]) -> np.ndarray` and `store_embeddings(chunks: List[dict], embeddings: np.ndarray, collection_name: str)`. I expect Copilot to autocomplete: `embedding.py` with `get_embedding_model()` returning the sentence-transformers model and `embed_batch(texts)` producing normalized embeddings, plus `vector_store.py` with `create_collection(name)` initializing ChromaDB, `add_documents(collection, chunks, embeddings)` storing vectors with metadata, and `search_collection(collection, query_embedding, k=5)` retrieving relevant chunks. I'll verify correctness by: embedding 3 known-similar sentences (e.g., "CPT requires one year of study", "You must complete two semesters before CPT eligibility", "One academic year is prerequisite for CPT") and confirming they have cosine similarity >0.8, then inserting 50 test chunks and querying with "scholarship GPA requirements" to check that the top-5 results include the scholarship policy document.
+I will use **GitHub Copilot** (with GPT-4 backend) paired with manual testing to build the embedding and vector store components. I'll provide Copilot with: (1) the "Retrieval Approach" section specifying all-MiniLM-L6-v2 and top-k=5, (2) the Architecture diagram showing ChromaDB integration, and (3) inline comments in the code specifying function signatures like `embed_texts(texts: List[str]) -> np.ndarray` and `store_embeddings(chunks: List[dict], embeddings: np.ndarray, collection_name: str)`. I expect Copilot to autocomplete: `embedding.py` with `get_embedding_model()` returning the sentence-transformers model and `embed_batch(texts)` producing normalized embeddings, plus `vector_store.py` with `create_collection(name)` initializing ChromaDB, `add_documents(collection, chunks, embeddings)` storing vectors with metadata, and `search_collection(collection, query_embedding, k=5)` retrieving relevant chunks. I'll verify correctness by: embedding 3 known-similar sentences (e.g., "CPT requires one year of study", "You must complete two semesters before CPT eligibility", "One academic year is prerequisite for CPT") and confirming they have cosine similarity >0.8, then inserting all 12 test chunks and querying with "CPT start date" to check that the top-5 results include the CPT FAQ document.
 
 **Milestone 5 — Generation and interface:**
 
-I will use **ChatGPT-4o** to develop the generation pipeline and simple web interface. I'll provide it with: (1) the "Evaluation Plan" table with 5 test questions and expected answers, (2) the "Anticipated Challenges" section highlighting the need for source attribution and handling conflicting information, (3) the Architecture diagram showing Groq API integration, and (4) a sample retrieved context block with 5 chunks. I expect ChatGPT to produce: `generation.py` with `build_prompt(query, retrieved_chunks)` constructing a system prompt that includes retrieved context with source citations, `generate_answer(prompt, model="llama3-70b")` calling Groq API with temperature=0.3 and max_tokens=500, and `app.py` implementing a Streamlit interface with text input, submit button, and formatted response display showing answer plus cited sources. I'll verify quality by: running all 5 evaluation questions through the system and checking that responses match expected answers within 80% semantic similarity (using BLEU score or manual grading), confirming that each response cites at least 2 sources, and testing edge cases like "What is CPT?" (should return general definition) versus "How do I apply for CPT at Trine?" (should return specific procedural steps with ISSS contact info).
+I will use **ChatGPT-4o** to develop the generation pipeline and simple web interface. I'll provide it with: (1) the "Evaluation Plan" table with 5 test questions and expected answers, (2) the "Anticipated Challenges" section highlighting the need for source attribution and handling conflicting information, (3) the Architecture diagram showing Groq API integration, and (4) a sample retrieved context block with chunks. I expect ChatGPT to produce: `generation.py` with `build_prompt(query, retrieved_chunks)` constructing a system prompt that includes retrieved context with source citations, `generate_answer(prompt, model="llama3-70b")` calling Groq API with temperature=0.3 and max_tokens=500, and `app.py` implementing a Streamlit interface with text input, submit button, and formatted response display showing answer plus cited sources. I'll verify quality by: running all 5 evaluation questions through the system and checking that responses match expected answers within 80% semantic similarity (using BLEU score or manual grading), confirming that each response cites at least 2 sources, and testing edge cases like "What is CPT?" (should return general definition) versus "How do I apply for CPT at Trine?" (should return specific procedural steps).
