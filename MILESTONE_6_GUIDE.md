@@ -45,15 +45,33 @@
 
 ---
 
-### 2:30-3:30 - Query 3: FAILURE CASE ⚠️
-**Type:** "What is the step-by-step CISI application process and timeline?"
+### 2:30-3:30 - Query 3: FAILURE CASE ️
+
+**Option A - Out-of-Scope Query (Recommended):**
+**Type:** "What do students say about Professor Smith's teaching style?"
+
+**Expected Behavior:** System should refuse to answer because this information is NOT in the FAQ documents.
 
 **Show:**
-- ❌ Response missing email addresses
-- ❌ No Tuesday/Friday schedule
-- ❌ No 12-hour timeline mention
+- ❌ Response: "I don't have enough information to answer this question."
+- ⚠️ Warning note appears: "This response may not be based on retrieved document content."
+- Sources panel shows retrieved docs, but none contain professor reviews
 
-**Say:** "Here's a failure case. System retrieved correct document (申请流程.txt) but failed to extract specific details like email addresses and timelines. This happened because information was split across chunk boundaries during preprocessing. To fix: use smaller chunks with more overlap for procedural documents."
+**Say:** "Here's an important failure case - or rather, a correct refusal. The system correctly identifies that professor reviews are NOT in our FAQ documents and refuses to answer. This demonstrates proper grounding enforcement. The system won't hallucinate information that isn't in the sources."
+
+---
+
+**Option B - Partial Retrieval Failure (Alternative):**
+**Type:** "What are the specific requirements for OPT application after graduation?"
+
+**Why it fails:** The documents focus on CPT (Curricular Practical Training) but have limited coverage of OPT (Optional Practical Training). The retrieval may return CPT-related chunks that don't fully answer OPT-specific questions.
+
+**Show:**
+- ️ Response mentions CPT policies but lacks OPT-specific details
+- ❌ Missing: OPT application timeline, USCIS forms, post-completion rules
+- Sources show CPT问题.txt but not comprehensive OPT guidance
+
+**Say:** "This query partially fails because our documents focus on CPT work authorization, not OPT. The system retrieves related immigration content but can't provide complete OPT application steps. This shows a knowledge gap in our document collection - we'd need to add OPT-specific FAQs to fix this."
 
 ---
 
