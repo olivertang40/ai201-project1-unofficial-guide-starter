@@ -18,7 +18,7 @@
 > **Author:** Oliver Tang
 > **Date:** June 2026  
 > **Milestone:** Complete (Milestones 1-6)
-> **Demo:** [Watch on Vimeo (4m 32s)](https://vimeo.com/1199254968)
+> **Demo:** [Watch on Vimeo (4m 32s)]
 
 ---
 
